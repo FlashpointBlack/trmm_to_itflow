@@ -1,45 +1,25 @@
 {
-  "name": "Sync RMM to itFlow copy",
   "nodes": [
     {
       "parameters": {},
-      "id": "5fe05a3f-15e4-4312-8483-69b01e0ba739",
+      "id": "5d60c1fe-1299-4309-87d1-9de9216df828",
       "name": "On clicking 'execute'",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        320,
-        40
+        -304,
+        80
       ]
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "={{ $('Setup').item.json.itflow.apiUrl }}/assets/create.php",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify($('Dispositivo').item.json[\"payload\"]) }}",
-        "options": {}
-      },
-      "id": "aa440fcc-165a-40f7-b7ed-e723c4445220",
-      "name": "itFlow - Create Asset",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 3,
-      "position": [
-        2500,
-        580
-      ],
-      "retryOnFail": true
-    },
-    {
-      "parameters": {
-        "url": "={{ $node['Setup'].json.itflow.apiUrl }}/clients/read.php ",
+        "url": "={{ $json.itflow.apiUrl }}/clients/read.php ",
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
             {
               "name": "api_key",
-              "value": "={{ $node['Setup'].json.itflow.apiKey }}"
+              "value": "={{ $json.itflow.apiKey }}"
             },
             {
               "name": "limit",
@@ -49,190 +29,37 @@
         },
         "options": {}
       },
-      "id": "36d3189b-660a-490b-b33f-ab39e9c25e49",
+      "id": "209cdb16-367b-4315-9247-12dc2a648af2",
       "name": "itFlow - Get Clients",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 3,
       "position": [
-        600,
-        240
-      ]
-    },
-    {
-      "parameters": {
-        "fieldToSplitOut": "=data",
-        "options": {}
-      },
-      "id": "b95cb4d1-127d-41a3-bfa1-c529727564f8",
-      "name": "Item Lists",
-      "type": "n8n-nodes-base.itemLists",
-      "typeVersion": 1,
-      "position": [
-        820,
-        240
+        -16,
+        288
       ]
     },
     {
       "parameters": {
         "mode": "chooseBranch"
       },
-      "id": "92b44a49-dfde-4283-bcd7-7544e54b23c6",
+      "id": "6c4905cc-b016-46b0-990b-26e1951b7783",
       "name": "Merge",
       "type": "n8n-nodes-base.merge",
       "typeVersion": 2,
       "position": [
-        1200,
-        400
-      ]
-    },
-    {
-      "parameters": {
-        "keepOnlySet": true,
-        "values": {
-          "string": [
-            {
-              "name": "itflow.client_id",
-              "value": "={{ $json.client_id }}"
-            },
-            {
-              "name": "itflow.client_name",
-              "value": "={{ $json.client_name }}"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "id": "8e685f99-7704-4edf-8ab9-272832815890",
-      "name": "Set",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 1,
-      "position": [
-        1040,
-        240
-      ]
-    },
-    {
-      "parameters": {
-        "url": "={{ $('Setup').item.json.itflow.apiUrl }}/assets/read.php",
-        "sendQuery": true,
-        "queryParameters": {
-          "parameters": [
-            {
-              "name": "client_id",
-              "value": "={{ $json.client.client_id }}"
-            },
-            {
-              "name": "asset_name",
-              "value": "={{ $json.payload.asset_name }}"
-            },
-            {
-              "name": "api_key",
-              "value": "={{ $('Setup').item.json.itflow.apiKey }}"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "id": "140adf73-4156-4fd7-8df5-7208608255de",
-      "name": "itFlow - Get Asset",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 3,
-      "position": [
-        2580,
-        280
-      ]
-    },
-    {
-      "parameters": {
-        "operation": "aggregateItems",
-        "aggregate": "aggregateAllItemData",
-        "destinationFieldName": "rmm"
-      },
-      "id": "bc5bf31f-f109-4081-b488-623920e982ca",
-      "name": "rmm clients",
-      "type": "n8n-nodes-base.itemLists",
-      "typeVersion": 1,
-      "position": [
-        820,
-        420
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "let rmm_clients = $node['rmm clients'].json.rmm;\n\n\nfor (const item of $input.all()) {\n\n  let rmm = rmm_clients.find( x=> x.name == item.json.itflow.client_name ) \n  if(rmm){\n    item.json.importarAgentes = true;\n    item.json.rmm = rmm;\n  }else{\n    item.json.importarAgentes = false;\n  }\n}\n\nreturn $input.all();"
-      },
-      "id": "85d40947-6074-4860-8fed-5799388db68e",
-      "name": "Code",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 1,
-      "position": [
-        1400,
-        400
-      ]
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "boolean": [
-            {
-              "value1": "={{ $json.importarAgentes }}",
-              "value2": true
-            }
-          ]
-        }
-      },
-      "id": "dcc31729-9ad2-4872-8618-eb9540885ebb",
-      "name": "Importar Agentes?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 1,
-      "position": [
-        1620,
-        400
-      ]
-    },
-    {
-      "parameters": {
-        "batchSize": 1,
-        "options": {}
-      },
-      "id": "45751f3f-25f6-4a2c-a45f-8e83e24ec5c7",
-      "name": "SplitInBatches",
-      "type": "n8n-nodes-base.splitInBatches",
-      "typeVersion": 1,
-      "position": [
-        1800,
-        280
-      ]
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "string": [
-            {
-              "value1": "={{ $json.success }}",
-              "value2": "=True"
-            }
-          ]
-        }
-      },
-      "id": "963b9664-2428-4cbc-bc81-89ca687ec514",
-      "name": "Agente existe no itflow?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 1,
-      "position": [
-        2200,
-        560
+        576,
+        448
       ]
     },
     {
       "parameters": {},
-      "id": "1bb20592-6d6a-40f5-9493-24c115518c3f",
+      "id": "5ccd9dd4-4023-4647-91ab-1bc737c4456c",
       "name": "Next Client",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        1860,
-        560
+        1280,
+        592
       ]
     },
     {
@@ -246,53 +73,25 @@
           ]
         }
       },
-      "id": "c361aa65-08ad-44a1-a01a-4f894d06f17b",
+      "id": "05e851e7-e458-4e6d-a6bb-cad7f7bb2b6f",
       "name": "Schedule Trigger",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1,
       "position": [
-        320,
-        -120
-      ]
-    },
-    {
-      "parameters": {
-        "content": "## Dont use TRMM node, its bugging the all n8n",
-        "height": 80,
-        "width": 542.2172452407615
-      },
-      "id": "df8d42db-63ad-41b8-96ef-02529da4a90c",
-      "name": "Note",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        -180,
-        180
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "let assets = [];\nlet x;\n\n\n\nfor (const item of $input.all()) {\n  x = {};\n  x.payload = {};\n\n  x.payload.asset_name = item.json.hostname;\n  x.payload.asset_description = item.json.description;\n  x.payload.asset_model = item.json.make_model.replace('\\n','');\n  \n  //x.payload.asset_type = item.json.monitoring_type == 'workstation' ? 'Desktop' : 'Server';\n  if(item.json.monitoring_type == 'workstation'){\n    x.payload.asset_type = 'Desktop'\n  }else{\n    if(item.json.monitoring_type == 'server'){\n      if(x.payload.asset_model.includes('QEMU'))\n        x.payload.asset_type = 'Virtual Machine'\n      else\n        x.payload.asset_type = 'Server'\n    }\n  }\n  \n  x.payload.asset_serial = item.json.serial_number;\n  \n  x.payload.asset_os = item.json.operating_system;\n\n  try{\n  //analise de qual index escolher, excluindo ipv6 ips zerotier etc\n  item.json.local_ips.split(',').forEach(function(ip,index,arr){\n         if(ip.includes(\"error\") || ip.includes(\"::\") || ip.includes(\"2804:\") ){\n           x.payload.asset_ip = '';\n         }else{\n           if( ip.includes('10.147.') || ip.includes('169.254') ){\n             x.payload.asset_ip = '';\n           }else{\n             x.payload.asset_ip = ip.split('/')[0];\n             throw new Error(\"Fim\");\n           }\n         }\n      })\n  }catch (error) {\n  console.error(error.message);\n}\n\n  \n\n\n  // pegar o last_seen e comparar, caso offline a muito tempo, virar Retired\n  x.payload.asset_status = \"Deployed\";\n\n  \n  // cpu, contar quantos tem e mostrar numero X nome\n  x.payload.asset_notes = item.json.cpu_model.length + ' x ' + item.json.cpu_model[0] + '\\n' \n    + item.json.graphics + '\\n';\n  // mostra discos\n  item.json.physical_disks.forEach(function(disk,index,arr){\n          x.payload.asset_notes += disk + '\\n'\n      })\n\n\n\n  x.payload.asset_uri = $node['Setup'].json.rmm.rmmUrl + \"/agents/\"+ item.json.agent_id\n    \n  x.client = $node['SplitInBatches'].json.itflow \n  x.payload.api_key = $node['Setup'].json.itflow.apiKey;\n  x.payload.client_id = x.client.client_id;\n\n   x.payload.client_id = x.client.client_id;\n   \n  \n  assets.push(x); \n}\n\nreturn assets;"
-      },
-      "id": "6f62ba46-7095-44aa-afa8-4f738da2467d",
-      "name": "Dispositivo",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 1,
-      "position": [
-        2280,
-        280
+        -304,
+        -80
       ]
     },
     {
       "parameters": {
         "method": "POST",
-        "url": "={{ $node['Setup'].json.itflow.apiUrl }}/clients/create.php",
+        "url": "={{ $node['Define your variables here'].json.itflow.apiUrl }}/clients/create.php",
         "sendBody": true,
         "bodyParameters": {
           "parameters": [
             {
               "name": "api_key",
-              "value": "={{ $node['Setup'].json.itflow.apiKey }}"
+              "value": "={{ $node['Define your variables here'].json.itflow.apiKey }}"
             },
             {
               "name": "client_name",
@@ -317,31 +116,42 @@
         },
         "options": {}
       },
-      "id": "7a28b544-9bc5-4635-a0a3-5fbc4ab2600c",
+      "id": "35ca84e1-6572-4eb3-ab47-f0f84eafdaf8",
       "name": "itFlow - Create Client",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 3,
       "position": [
-        1220,
-        700
+        752,
+        752
       ]
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "={{ $('Setup').item.json.itflow.apiUrl }}/assets/update.php",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify($json) }}",
+        "fieldToSplitOut": "=data",
         "options": {}
       },
-      "id": "4edde596-6c99-4ce2-82ba-8d91ddfe038d",
-      "name": "itFlow - Update Asset",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 3,
+      "id": "24a122de-fedd-448f-9cb7-6177d5a79926",
+      "name": "List ITFlow Clients",
+      "type": "n8n-nodes-base.itemLists",
+      "typeVersion": 1,
       "position": [
-        2940,
-        840
+        208,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "aggregateItems",
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "rmm"
+      },
+      "id": "3ac194a1-f46d-44a9-83af-8b431879ca3a",
+      "name": "List TRMM Clients",
+      "type": "n8n-nodes-base.itemLists",
+      "typeVersion": 1,
+      "position": [
+        208,
+        464
       ]
     },
     {
@@ -350,51 +160,63 @@
         "values": {
           "string": [
             {
-              "name": "api_key",
-              "value": "={{ $('Dispositivo').item.json.payload.api_key }}"
+              "name": "itflow.client_id",
+              "value": "={{ $json.client_id }}"
             },
             {
-              "name": "client_id",
-              "value": "={{ $('Dispositivo').item.json.payload.client_id }}"
-            },
-            {
-              "name": "asset_id",
-              "value": "={{ $json.data[0].asset_id }}"
-            },
-            {
-              "name": "asset_description",
-              "value": "={{ $('Dispositivo').item.json.payload.asset_description }}"
-            },
-            {
-              "name": "asset_ip",
-              "value": "={{ $('Dispositivo').item.json.payload.asset_ip }}"
+              "name": "itflow.client_name",
+              "value": "={{ $json.client_name }}"
             }
           ]
         },
         "options": {}
       },
-      "id": "70bf953a-a5e0-48e6-9750-74ae00f7ecf4",
-      "name": "Set1",
+      "id": "ac94999a-49ef-473f-8bc6-1f71a0250303",
+      "name": "Save only the Client_ID and Client_Name",
       "type": "n8n-nodes-base.set",
       "typeVersion": 1,
       "position": [
-        2680,
-        840
+        416,
+        288
       ]
     },
     {
       "parameters": {
-        "content": "## Direction of this Sync:\n## RMM to ITFlow",
-        "height": 130.30235162374035,
-        "width": 344.81522956326967
+        "url": "={{ $('Define your variables here').item.json.rmm.apiUrl }}/clients",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-KEY",
+              "value": "={{ $('Define your variables here').item.json.rmm.apiKey }}"
+            }
+          ]
+        },
+        "options": {}
       },
-      "id": "a09bfd73-6da4-4aec-aad0-0bd2e3ba780e",
-      "name": "Note1",
+      "id": "e21906af-2798-4222-bac4-037bf83ff164",
+      "name": "TRMM - Get Clients",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -16,
+        528
+      ],
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "content": "Leave only the items in TRMM that don't exist in ITFlow and are not excluded\n\n",
+        "height": 80,
+        "width": 215
+      },
+      "id": "492c97fd-8bc7-4f7f-9859-07239431ed2a",
+      "name": "Sticky Note1",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -180,
-        280
+        144,
+        912
       ]
     },
     {
@@ -402,55 +224,37 @@
         "conditions": {
           "string": [
             {
-              "value1": "={{ $json.data[0].asset_description }}",
-              "operation": "notEqual",
-              "value2": "={{ $('Dispositivo').item.json.payload.asset_description}}"
-            },
-            {
-              "value1": "={{ $json.data[0].asset_ip.trim() }}",
-              "operation": "notEqual",
-              "value2": "={{ $('Dispositivo').item.json.payload.asset_ip.trim()}}"
+              "value1": "={{ $json }}",
+              "operation": "isNotEmpty"
             }
           ]
-        },
-        "combineOperation": "any"
+        }
       },
-      "id": "cf99d6c0-5a43-4b32-a1e5-ccfeb76c6b29",
-      "name": "Campos DESAtualizados?",
+      "id": "3202941a-f8a9-43ea-a233-9f752d8cc5f3",
+      "name": "If there are clients to add",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        2420,
-        820
+        464,
+        784
       ]
     },
     {
       "parameters": {
-        "url": "={{ $node['Setup'].json.rmm.apiUrl }}/clients",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "X-API-KEY",
-              "value": "={{ $node['Setup'].json.rmm.apiKey }}"
-            }
-          ]
-        },
-        "options": {}
+        "jsCode": "let rmmClients = $node['List TRMM Clients'].json.rmm;\n\nfor (const item of $input.all()) {\n\n  // find a matching RMM client by comparing the RMM client name \n  // with the itFlow client name from the current item\n  let rmmMatch = rmmClients.find(x => x.name == item.json.itflow.client_name);\n\n  if (rmmMatch) {\n    // RMM client exists — mark for agent import\n    item.json.importAgents = true;\n    item.json.rmm = rmmMatch;  // attach the matching RMM client data\n  } else {\n    // no matching RMM client found — skip agent import\n    item.json.importAgents = false;\n  }\n}\n\n// return all modified input items\nreturn $input.all();\n"
       },
-      "id": "94e25deb-cfa3-4c43-a8d8-14bb9ec1b0e6",
-      "name": "HTTP Request",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.1,
+      "id": "6a108abf-ea3d-4219-9b0a-0315f9103ee8",
+      "name": "Attach ITFlow Details to TRMM JSON",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
       "position": [
-        600,
-        480
-      ],
-      "retryOnFail": true
+        784,
+        448
+      ]
     },
     {
       "parameters": {
-        "url": "={{ $node['Setup'].json.rmm.apiUrl }}/agents",
+        "url": "={{ $node['Define your variables here'].json.rmm.apiUrl }}/agents",
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
@@ -465,68 +269,143 @@
           "parameters": [
             {
               "name": "X-API-KEY",
-              "value": "={{ $node['Setup'].json.rmm.apiKey }}"
+              "value": "={{ $node['Define your variables here'].json.rmm.apiKey }}"
             }
           ]
         },
         "options": {}
       },
-      "id": "e98fe3dc-c7cb-4e02-90c0-12a76d3fc1ca",
-      "name": "HTTP Request1",
+      "id": "d1f43cb7-e287-4f5b-98c5-893484cb2f82",
+      "name": "Retrieve TRMM Agent list for Client",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
       "position": [
-        2040,
-        280
+        1472,
+        320
       ]
     },
     {
       "parameters": {
-        "content": "# TODO\n\n## MAP TRMM SITE TO ITFLOW LOCATION\n\n",
-        "height": 352.16125419932814,
-        "width": 566.6741321388578
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.importAgents }}",
+              "value2": true
+            }
+          ]
+        }
       },
-      "id": "a9726bfa-cd1e-44df-90c9-8edb3070fa69",
-      "name": "Sticky Note",
-      "type": "n8n-nodes-base.stickyNote",
+      "id": "e139209d-6ef1-42b1-bd6a-b2e70dbc182b",
+      "name": "If we need to import machine data from TRMM -> ITFlow",
+      "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        -180,
-        420
+        1008,
+        448
       ]
     },
     {
       "parameters": {
-        "jsCode": "let itflow_clients = $node['itFlow - Get Clients'].json.data;\nlet criarClientes = []; \n\n\nfor (const item of $input.all()) {\n\n  let itflow = itflow_clients.find( x=> x.client_name == item.json.name ) \n  \n  if(itflow){\n    //cliente rmm existe no itflow\n  }else{\n    //cliente rmm nao existe no itflow\n\n    //setup excluded clients from sync\n    let exclusao = []\n    exclusao.push(\"aaaa - Clientes Avulsos\")\n    exclusao.push(\"aaa NewGATE\")\n    exclusao.push(\"aaa New Install\")\n    \n    \n    if(exclusao.includes(item.json.name) )\n      continue\n    \n    criarClientes.push(item.json)\n    //break\n  }\n}\n\nreturn criarClientes"
+        "batchSize": 1,
+        "options": {}
       },
-      "id": "23e4d837-13c5-4365-8350-d43e666bb072",
-      "name": "Clients to Create",
+      "id": "d45f823c-c084-40c3-a805-5f6ed62fc211",
+      "name": "Loop through all Clients",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 1,
+      "position": [
+        1264,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "let assets = [];\nlet asset;\n\nfor (const item of $input.all()) {\n  asset = {};\n  asset.payload = {};\n\n  // basic identity\n  asset.payload.asset_name = item.json.hostname;\n  asset.payload.asset_description = item.json.description;\n  asset.payload.asset_model = item.json.make_model.replace('\\n', '');\n\n  // asset type mapping: workstation → Desktop; server → Server/VM (QEMU heuristic)\n  if (item.json.monitoring_type == 'workstation') {\n    asset.payload.asset_type = 'Desktop';\n  } else {\n    if (item.json.monitoring_type == 'server') {\n      if (asset.payload.asset_model.includes('QEMU')) {\n        asset.payload.asset_type = 'Virtual Machine';\n      } else {\n        asset.payload.asset_type = 'Server';\n      }\n    }\n  }\n\n  asset.payload.asset_serial = item.json.serial_number;\n  asset.payload.asset_os = item.json.operating_system;\n\n  try {\n    // choose the first valid IPv4, skipping invalid/undesired ranges (IPv6, zerotier, link-local, custom nets)\n    item.json.local_ips.split(',').forEach(function (ip) {\n      if (ip.includes(\"error\") || ip.includes(\"::\") || ip.includes(\"2804:\")) {\n        asset.payload.asset_ip = '';\n      } else {\n        if (ip.includes('169.254')) {\n          asset.payload.asset_ip = '';\n        } else {\n          asset.payload.asset_ip = ip.split('/')[0];\n          // break out of forEach early once we’ve set a good IP\n          throw new Error(\"StopIteration\");\n        }\n      }\n    });\n  } catch (error) {\n    console.error(error.message);\n  }\n\n  // TODO: compare last_seen and, if offline for a long time, mark as \"Retired\"\n  asset.payload.asset_status = \"Deployed\";\n\n  // build notes: CPU count × model, then GPU, then list physical disks\n  asset.payload.asset_notes =\n    item.json.cpu_model.length + ' x ' + item.json.cpu_model[0] + '\\n' +\n    item.json.graphics + '\\n';\n\n  item.json.physical_disks.forEach(function (disk) {\n    asset.payload.asset_notes += disk + '\\n';\n  });\n\n  // deep link to agent in RMM UI\n  asset.payload.asset_uri =\n    $node['Define your variables here'].json.rmm.rmmUrl + \"/agents/\" + item.json.agent_id;\n\n  // itFlow / client context and auth\n  asset.client = $node['Loop through all Clients'].json.itflow;\n  asset.payload.api_key = $node['Define your variables here'].json.itflow.apiKey;\n  asset.payload.client_id = asset.client.client_id;\n\n  // collect the assembled asset\n  assets.push(asset); // append this asset object to the output array\n}\n\nreturn assets;\n"
+      },
+      "id": "a2dcce02-f5a7-4be1-b561-a9cd79eead01",
+      "name": "Build TRMM asset details",
       "type": "n8n-nodes-base.code",
       "typeVersion": 1,
       "position": [
-        820,
-        720
+        1680,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Define your variables here').item.json.itflow.apiUrl }}/assets/read.php",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "client_id",
+              "value": "={{ $json.client.client_id }}"
+            },
+            {
+              "name": "asset_name",
+              "value": "={{ $json.payload.asset_name }}"
+            },
+            {
+              "name": "api_key",
+              "value": "={{ $('Define your variables here').item.json.itflow.apiKey }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "319318f3-f700-4ea8-9985-5b65aebfc5ad",
+      "name": "Check ITFlow for existing asset",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        1968,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Define your variables here').item.json.itflow.apiUrl }}/assets/create.php",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($('Build TRMM asset details').item.json[\"payload\"]) }}",
+        "options": {}
+      },
+      "id": "8571d541-5e36-4f9b-a925-9844c5c490df",
+      "name": "ITFlow - Create Asset",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        1792,
+        624
       ],
-      "alwaysOutputData": true
+      "retryOnFail": true
     },
     {
       "parameters": {
         "conditions": {
           "string": [
             {
-              "value1": "={{ $json }}",
-              "operation": "isNotEmpty"
+              "value1": "=={{ (( $json.data && $json.data[0] && $json.data[0].asset_description ) || '' ) }}\n",
+              "operation": "notEqual",
+              "value2": "=={{ ( $('Build TRMM asset details').item.json.payload.asset_description || '' ) }}\n"
+            },
+            {
+              "value1": "=={{ (( $json.data && $json.data[0] && $json.data[0].asset_ip ) || '' ).trim() }}\n",
+              "operation": "notEqual",
+              "value2": "=={{ ( $('Build TRMM asset details').item.json.payload.asset_ip || '' ).trim() }}\n"
             }
           ]
-        }
+        },
+        "combineOperation": "any"
       },
-      "id": "5769aaa2-d3db-4d5b-b4e9-c29005466992",
-      "name": "IF",
+      "id": "eadf8dd4-f5a8-4803-a2da-99177a174b3f",
+      "name": "If The TRMM Data differs from the ITFlow Data",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        1000,
-        720
+        1920,
+        896
       ]
     },
     {
@@ -535,96 +414,157 @@
         "values": {
           "string": [
             {
-              "name": "itflow.apiUrl",
-              "value": "=https://itflow.yourdomain.com/api/v1"
+              "name": "api_key",
+              "value": "={{ $('Build TRMM asset details').item.json.payload.api_key }}"
             },
             {
-              "name": "itflow.apiKey",
-              "value": "="
+              "name": "client_id",
+              "value": "={{ $('Build TRMM asset details').item.json.payload.client_id }}"
             },
             {
-              "name": "rmm.apiUrl",
-              "value": "https://api.yourdomain.com"
+              "name": "asset_id",
+              "value": "={{ $json.data[0].asset_id }}"
             },
             {
-              "name": "rmm.rmmUrl",
-              "value": "https://rmm.yourdomain.com"
+              "name": "asset_description",
+              "value": "={{ $('Build TRMM asset details').item.json.payload.asset_description }}"
             },
             {
-              "name": "rmm.apiKey"
+              "name": "asset_ip",
+              "value": "={{ $('Build TRMM asset details').item.json.payload.asset_ip }}"
             }
           ]
         },
         "options": {}
       },
-      "id": "36c39ee7-4599-42bc-b729-febe7916c9d3",
-      "name": "Setup",
+      "id": "3455918c-d58c-47cb-a289-8d006f70891b",
+      "name": "Restructure Data For Submission",
       "type": "n8n-nodes-base.set",
       "typeVersion": 1,
       "position": [
-        600,
-        40
+        2176,
+        912
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Define your variables here').item.json.itflow.apiUrl }}/assets/update.php",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "id": "78a46255-2564-4a7b-9281-0cb602e601df",
+      "name": "ITFlow - Update Asset",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        2432,
+        912
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.success }}",
+              "value2": "True"
+            }
+          ]
+        }
+      },
+      "id": "c8f74dbe-429b-4102-9192-0b4527735893",
+      "name": "If The TRMM Machine exist in ITFlow1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1568,
+        608
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "let itflowClients = $node['itFlow - Get Clients'].json.data;\nlet createClients = [];\n\n// pull the exclusion list from the main variable node and split into an array\nconst exclusions = $node['Define your variables here'].json.excludedClients\n  .split(',')\n  .map(e => e.trim());\n\nfor (const item of $input.all()) {\n\n  // look for a client in itFlow with the same name as this item\n  let itflowMatch = itflowClients.find(x => x.client_name == item.json.name);\n  \n  if (itflowMatch) {\n    // client already exists in itFlow\n  } else {\n    // client does not exist in itFlow\n\n    // skip any clients found in the exclusion list\n    if (exclusions.includes(item.json.name))\n      continue;\n\n    // add client to the list for creation (only non-excluded, non-existing clients)\n    createClients.push(item.json);\n  }\n}\n\nreturn createClients;"
+      },
+      "id": "53a443e0-a1af-4dfc-8a6a-b564241d85ac",
+      "name": "Find TRMM Clients that don't exist in ITFlow",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        208,
+        768
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "itflow.apiUrl",
+              "value": "=https://itflow.domain.com/api/v1"
+            },
+            {
+              "name": "itflow.apiKey",
+              "value": "=<ITFLOW API KEY HERE>"
+            },
+            {
+              "name": "rmm.apiUrl",
+              "value": "https://api.domain.com"
+            },
+            {
+              "name": "rmm.rmmUrl",
+              "value": "https://rmm.domain.com"
+            },
+            {
+              "name": "rmm.apiKey",
+              "value": "<TRMM API KEY HERE>"
+            },
+            {
+              "name": "excludedClients",
+              "value": "=<ListOfClientsToExclude,SeparatedByCommas,Walmart,Costco,ClientName>"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "da77433c-92f2-4b54-862d-e6e3339f52d9",
+      "name": "Define your variables here",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        32
       ]
     }
   ],
-  "pinData": {},
   "connections": {
-    "itFlow - Get Clients": {
-      "main": [
-        [
-          {
-            "node": "Item Lists",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "HTTP Request",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Item Lists": {
-      "main": [
-        [
-          {
-            "node": "Set",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "On clicking 'execute'": {
       "main": [
         [
           {
-            "node": "Setup",
+            "node": "Define your variables here",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Set": {
+    "itFlow - Get Clients": {
       "main": [
         [
           {
-            "node": "Merge",
+            "node": "List ITFlow Clients",
             "type": "main",
             "index": 0
-          }
-        ]
-      ]
-    },
-    "rmm clients": {
-      "main": [
-        [
+          },
           {
-            "node": "Merge",
+            "node": "TRMM - Get Clients",
             "type": "main",
-            "index": 1
+            "index": 0
           }
         ]
       ]
@@ -633,80 +573,7 @@
       "main": [
         [
           {
-            "node": "Code",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Code": {
-      "main": [
-        [
-          {
-            "node": "Importar Agentes?",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Importar Agentes?": {
-      "main": [
-        [
-          {
-            "node": "SplitInBatches",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "SplitInBatches": {
-      "main": [
-        [
-          {
-            "node": "HTTP Request1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "itFlow - Get Asset": {
-      "main": [
-        [
-          {
-            "node": "Agente existe no itflow?",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Agente existe no itflow?": {
-      "main": [
-        [
-          {
-            "node": "Campos DESAtualizados?",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "itFlow - Create Asset",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "itFlow - Create Asset": {
-      "main": [
-        [
-          {
-            "node": "Next Client",
+            "node": "Attach ITFlow Details to TRMM JSON",
             "type": "main",
             "index": 0
           }
@@ -717,7 +584,7 @@
       "main": [
         [
           {
-            "node": "SplitInBatches",
+            "node": "Loop through all Clients",
             "type": "main",
             "index": 0
           }
@@ -728,25 +595,140 @@
       "main": [
         [
           {
-            "node": "Setup",
+            "node": "Define your variables here",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Dispositivo": {
+    "List ITFlow Clients": {
       "main": [
         [
           {
-            "node": "itFlow - Get Asset",
+            "node": "Save only the Client_ID and Client_Name",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "itFlow - Update Asset": {
+    "List TRMM Clients": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Save only the Client_ID and Client_Name": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TRMM - Get Clients": {
+      "main": [
+        [
+          {
+            "node": "List TRMM Clients",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Find TRMM Clients that don't exist in ITFlow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If there are clients to add": {
+      "main": [
+        [
+          {
+            "node": "itFlow - Create Client",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Attach ITFlow Details to TRMM JSON": {
+      "main": [
+        [
+          {
+            "node": "If we need to import machine data from TRMM -> ITFlow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Retrieve TRMM Agent list for Client": {
+      "main": [
+        [
+          {
+            "node": "Build TRMM asset details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If we need to import machine data from TRMM -> ITFlow": {
+      "main": [
+        [
+          {
+            "node": "Loop through all Clients",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop through all Clients": {
+      "main": [
+        [
+          {
+            "node": "Retrieve TRMM Agent list for Client",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build TRMM asset details": {
+      "main": [
+        [
+          {
+            "node": "Check ITFlow for existing asset",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check ITFlow for existing asset": {
+      "main": [
+        [
+          {
+            "node": "If The TRMM Machine exist in ITFlow1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ITFlow - Create Asset": {
       "main": [
         [
           {
@@ -757,22 +739,11 @@
         ]
       ]
     },
-    "Set1": {
+    "If The TRMM Data differs from the ITFlow Data": {
       "main": [
         [
           {
-            "node": "itFlow - Update Asset",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Campos DESAtualizados?": {
-      "main": [
-        [
-          {
-            "node": "Set1",
+            "node": "Restructure Data For Submission",
             "type": "main",
             "index": 0
           }
@@ -786,56 +757,58 @@
         ]
       ]
     },
-    "HTTP Request": {
+    "Restructure Data For Submission": {
       "main": [
         [
           {
-            "node": "rmm clients",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Clients to Create",
+            "node": "ITFlow - Update Asset",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "HTTP Request1": {
+    "ITFlow - Update Asset": {
       "main": [
         [
           {
-            "node": "Dispositivo",
+            "node": "Next Client",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Clients to Create": {
+    "If The TRMM Machine exist in ITFlow1": {
       "main": [
         [
           {
-            "node": "IF",
+            "node": "If The TRMM Data differs from the ITFlow Data",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "ITFlow - Create Asset",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "IF": {
+    "Find TRMM Clients that don't exist in ITFlow": {
       "main": [
         [
           {
-            "node": "itFlow - Create Client",
+            "node": "If there are clients to add",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Setup": {
+    "Define your variables here": {
       "main": [
         [
           {
@@ -847,24 +820,5 @@
       ]
     }
   },
-  "active": false,
-  "settings": {
-    "executionOrder": "v1",
-    "saveDataSuccessExecution": "none",
-    "saveManualExecutions": true,
-    "callerPolicy": "workflowsFromSameOwner"
-  },
-  "versionId": "ab88abe5-3f19-45a3-a1c9-f5a021d3725e",
-  "id": "aKwFYBoydQsZwx9G",
-  "meta": {
-    "instanceId": "975eba26f021425eb6152a0de419b496fc2d80b28ab5e4f2ae8633a66ee7660b"
-  },
-  "tags": [
-    {
-      "name": "HugoSampaio",
-      "id": "3QiMBWGhl4mbaRGS",
-      "createdAt": "2024-02-16T16:27:43.366Z",
-      "updatedAt": "2024-02-16T16:27:43.366Z"
-    }
-  ]
+  "pinData": {}
 }
